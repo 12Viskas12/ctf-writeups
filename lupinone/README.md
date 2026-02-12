@@ -13,6 +13,8 @@ First, I identified the target on the network and performed a service scan:
 
 nmap -sC -sV 192.168.56.102
 
+![nmap scan](screenshots/image1.png)
+
 The scan revealed a web server running on the machine.
 
 I accessed the website and checked common files such as `robots.txt`, which hinted at hidden content.
