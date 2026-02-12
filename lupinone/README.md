@@ -51,6 +51,8 @@ I then accessed the machine:
 
 ssh icex64@192.168.56.102
 
+![ssh login](screenshot/image8.png)
+
 User access was successfully obtained and the user flag was found.
 
 ---
