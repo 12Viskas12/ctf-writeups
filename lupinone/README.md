@@ -115,6 +115,8 @@ I compiled and executed the exploit and spawned a privileged shell.
 
 whoami
 
+![root access](screenshot/image16.png)
+
 Output:
 
 root
