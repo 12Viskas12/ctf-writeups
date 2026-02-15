@@ -141,9 +141,7 @@ whoami
 
 Output:
 
-```
 root
-```
 
 Root access was successfully obtained and the root flag was retrieved.
 
