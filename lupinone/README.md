@@ -11,7 +11,7 @@ The objective was to gain initial access to the system and escalate privileges t
 
 First, I identified the target on the network and performed a service scan:
 
-nmap -sC -sV 192.168.56.102
+`nmap -sC -sV 192.168.56.102`
 
 ![nmap scan](screenshot/image1.png)
 
@@ -25,7 +25,7 @@ I accessed the website and checked common files such as `robots.txt`, which hint
 
 To discover hidden directories I performed directory brute forcing:
 
-ffuf -w wordlist.txt -u http://192.168.56.102/FUZZ
+`ffuf -w wordlist.txt -u http://192.168.56.102/FUZZ`
 
 This revealed the directory:
 
@@ -49,7 +49,7 @@ password: P@55w0rd!
 
 I then accessed the machine:
 
-ssh icex64@192.168.56.102
+`ssh icex64@192.168.56.102`
 
 ![ssh login](screenshot/image8.png)
 
@@ -69,7 +69,7 @@ The account was a standard user with no administrative privileges.
 
 I checked sudo permissions:
 
-sudo -l
+`sudo -l`
 
 No sudo permissions were granted.
 
@@ -77,13 +77,13 @@ No sudo permissions were granted.
 
 I searched for SUID binaries:
 
-find / -perm -4000 -type f 2>/dev/null
+`find / -perm -4000 -type f 2>/dev/null`
 
 No obvious misconfigurations were discovered.
 
 I inspected scheduled tasks:
 
-cat /etc/crontab
+`cat /etc/crontab`
 
 No writable cron jobs were present.
 
@@ -95,7 +95,7 @@ I reviewed file ownership and writable files but found nothing exploitable.
 
 Next, I checked the kernel version:
 
-uname -a
+`uname -a`
 
 The machine was running an outdated Linux kernel.
 
@@ -113,7 +113,7 @@ DirtyPipe allows overwriting read-only files and gaining elevated privileges.
 
 I compiled and executed the exploit and spawned a privileged shell.
 
-whoami
+`whoami`
 
 ![root access](screenshot/image16.png)
 
