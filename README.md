@@ -5,3 +5,4 @@ This repository contains my walkthroughs of vulnerable machines and CTF challeng
 ## Machines
 
 * LupinOne
+* Crossroads
