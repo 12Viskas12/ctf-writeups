@@ -7,3 +7,4 @@ This repository contains my walkthroughs of vulnerable machines and CTF challeng
 * LupinOne
 * Crossroads
 * FoxHole
+* EvilBox-One
